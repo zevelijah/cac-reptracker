@@ -1,0 +1,3 @@
+go/server/api_test/*
+.env
+.env.*
