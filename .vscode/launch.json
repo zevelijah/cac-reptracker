@@ -28,9 +28,10 @@
             "envFile": "${workspaceFolder}/.env.local"
         },
         {
-            "name": "Flutter",
+            "name": "Flutter (with task run-local.sh)",
             "type": "dart",
             "request": "launch",
+            "preLaunchTask": "run-local.sh",
             "program": "dart/frontend/lib/main.dart"
         }
     ]

@@ -65,6 +65,9 @@ echo -e "\nDevelopment environment is running."
 echo "Backend server is active in the background."
 echo "Press Ctrl+C to stop the server and exit."
 
+sleep 12 # Give the emulator a moment to launch.
+echo "launch.json flutter debug configuration is ready to use."
+
 # Wait for the user to interrupt the script. This keeps the script alive
 # so the trap can function correctly when you press Ctrl+C.
 wait $GO_SERVER_PID
