@@ -124,12 +124,6 @@ class _StateRepPageState extends State<StateRepPage> {
           .toList();
       setState(() {
         states = loaded;
-        // Optionally preselect the first state
-        if (states.isNotEmpty) {
-          selectedStateCode = states.first.code;
-          // Kick off loading of representatives for the default state
-          _loadRepresentatives(states.first.code);
-        }
       });
     } catch (e) {
       setState(() {
@@ -144,6 +138,14 @@ class _StateRepPageState extends State<StateRepPage> {
 
   // Fetch representatives for a state
   Future<void> _loadRepresentatives(String stateCode) async {
+    // If the state code is empty (which can happen if nothing is selected),
+    // just clear the list and do nothing.
+    if (stateCode.isEmpty) {
+      setState(() {
+        representatives = [];
+      });
+      return;
+    }
     setState(() {
       isLoadingReps = true;
       errorMessage = null;
@@ -197,6 +199,7 @@ class _StateRepPageState extends State<StateRepPage> {
                       : DropdownButton<String>(
                           isExpanded: true,
                           value: selectedStateCode,
+                          hint: const Text('Select a state'),
                           items: states
                               .map(
                                 (s) => DropdownMenuItem(

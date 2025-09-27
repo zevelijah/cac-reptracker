@@ -39,13 +39,10 @@ func getMembers(state string) ([]Member, error) {
 		return []Member{}, nil
 	}
 
-	// The /v3/state/{stateCode}/members endpoint used previously is no longer available.
-	// The current approach is to fetch all members from the /v3/member endpoint
-	// and then filter them by state on our side.
-	path := "/member"
+	path := fmt.Sprintf("/member/%s", state)
 	rawJSON, err := fetchJSON(path, map[string]string{
 		"format": "json",
-		"limit":  "1000", // Fetch all members of Congress to filter locally
+		"limit":  "75", // Fetch all members of Congress to filter locally
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed fetching all members: %w", err)
@@ -115,7 +112,7 @@ func apiMemberToMember(apiM ApiMember) (Member, bool) {
 	default:
 		// For other parties, just use the initial if available.
 		if len(apiM.Party) > 0 {
-			partyDisplay = fmt.Sprintf(" (%c)", apiM.Party[0])
+			partyDisplay = fmt.Sprintf(" (%s)", apiM.Party)
 		}
 	}
 
