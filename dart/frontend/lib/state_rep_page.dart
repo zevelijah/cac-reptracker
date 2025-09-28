@@ -28,12 +28,16 @@ class Representative {
   final String lastName;
   final String party;
   final String district;
+  final int initialYear;
+  final String imageUrl;
   Representative({
     required this.id,
     required this.firstName,
     required this.lastName,
     required this.party,
     required this.district,
+    required this.initialYear,
+    required this.imageUrl,
   });
   factory Representative.fromJson(Map<String, dynamic> json) {
     return Representative(
@@ -42,6 +46,8 @@ class Representative {
       lastName: json['lastName'] as String,
       party: json['party'] as String,
       district: json['district'] as String,
+      initialYear: json['initialYear'] as int,
+      imageUrl: json['imageUrl'] as String,
     );
   }
 
@@ -227,13 +233,93 @@ class _StateRepPageState extends State<StateRepPage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 24),
 
             // Error display area
             if (errorMessage != null) ...[
               Text(errorMessage!, style: const TextStyle(color: Colors.red)),
             ],
+            const SizedBox(height: 12),
+
+            // Representative details area
+            if (selectedRepresentativeId != null && representatives.isNotEmpty)
+              Builder(
+                builder: (context) {
+                  final rep = representatives.firstWhere(
+                    (r) => r.id == selectedRepresentativeId,
+                    orElse: () => representatives.first,
+                  );
+                  return Card(
+                    margin: const EdgeInsets.only(top: 12.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Image on the left
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.network(
+                              rep.imageUrl,
+                              width: 100,
+                              height: 125,
+                              fit: BoxFit.cover,
+                              // Show a placeholder while loading
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      width: 100,
+                                      height: 125,
+                                      color: Colors.grey[300],
+                                      child: const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  },
+                              // Show an icon if the image fails to load
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 100,
+                                  height: 125,
+                                  color: Colors.grey[300],
+                                  child: const Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          // Details on the right
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${rep.firstName} ${rep.lastName}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Party: ${rep.party.isEmpty ? '—' : rep.party}',
+                                ),
+                                Text('District: ${rep.district}'),
+                                Text('In Congress since: ${rep.initialYear}'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),

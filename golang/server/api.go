@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -67,75 +66,6 @@ func getMembers(state string) ([]Member, error) {
 	memberCache.Set(state, members, 1*time.Hour)
 
 	return members, nil
-}
-
-// apiMemberToMember converts an ApiMember to a client-facing Member, for current members only.
-// It returns the member and a boolean indicating if the conversion was successful (i.e., is a current member).
-func apiMemberToMember(apiM ApiMember) (Member, bool) {
-	if len(apiM.Terms.Item) == 0 {
-		return Member{}, false
-	}
-
-	lastTerm := apiM.Terms.Item[len(apiM.Terms.Item)-1]
-
-	// Only include current members (those without an end year on their last term)
-	if lastTerm.EndYear != nil {
-		return Member{}, false
-	}
-
-	// Parse name in "Last, First Middle" format
-	var firstName, lastName string
-	parts := strings.SplitN(apiM.Name, ",", 2)
-	if len(parts) == 2 {
-		lastName = strings.TrimSpace(parts[0])
-		firstMiddle := strings.TrimSpace(parts[1])
-		// Take just the first name from "First Middle"
-		firstName = strings.Split(firstMiddle, " ")[0]
-	} else {
-		// Fallback for names not in "Last, First" format
-		lastName = strings.TrimSpace(apiM.Name)
-		firstName = ""
-	}
-
-	var partyDisplay string
-	switch apiM.Party {
-	case "Democratic":
-		partyDisplay = " (D)"
-	case "Republican":
-		partyDisplay = " (R)"
-	case "Independent":
-		partyDisplay = " (I)"
-	case "Libertarian":
-		partyDisplay = " (L)"
-	case "Green":
-		partyDisplay = " (G)"
-	default:
-		// For other parties, just use the initial if available.
-		if len(apiM.Party) > 0 {
-			partyDisplay = fmt.Sprintf(" (%s)", apiM.Party)
-		}
-	}
-
-	var districtDisplay string
-
-	if apiM.District == 0 {
-		// Find the current term (the one without EndYear)
-		if strings.EqualFold(lastTerm.Chamber, "Senate") {
-			districtDisplay = "Senator"
-		} else {
-			districtDisplay = "At-Large Rep."
-		}
-	} else {
-		districtDisplay = fmt.Sprintf("District %d Rep.", apiM.District)
-	}
-
-	return Member{
-		ID:        apiM.BioguideID,
-		FirstName: firstName,
-		LastName:  lastName,
-		Party:     partyDisplay,
-		District:  districtDisplay,
-	}, true
 }
 
 // readAPIKey retrieves the Congress.gov API key from environment variables.
